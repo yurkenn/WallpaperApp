@@ -1,7 +1,26 @@
-import '../translation';
-
 import { Stack } from 'expo-router';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 
-export default function Layout() {
-  return <Stack />;
-}
+const Layout = () => {
+  return (
+    <Stack>
+      <Stack.Screen
+        name="index"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="home/index"
+        options={{
+          headerShown: false,
+        }}
+      />
+    </Stack>
+  );
+};
+
+export default Layout;
+
+const styles = StyleSheet.create({});

@@ -14,6 +14,13 @@ const HomeScreen = () => {
   const [search, setSearch] = useState<string>('');
   const searchInputRef = useRef<TextInput>(null);
 
+  const [activeCategory, setActiveCategory] = useState(null);
+
+  const handleChangeCategory = (category) => {
+    setActiveCategory(category);
+  };
+  console.log('activeCategory', activeCategory);
+
   return (
     <View style={[styles.container, { paddingTop }]}>
       {/* Header */}
@@ -48,7 +55,7 @@ const HomeScreen = () => {
         </View>
         {/*Categories */}
         <View style={styles.categories}>
-          <Categories />
+          <Categories activeCategory={activeCategory} handleChangeCategory={handleChangeCategory} />
         </View>
       </ScrollView>
     </View>

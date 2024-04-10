@@ -1,5 +1,6 @@
 import React from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeIn, FadeInRight } from 'react-native-reanimated';
 
 import { data } from '~/constants/data';
 import { theme } from '~/constants/theme';
@@ -26,14 +27,21 @@ const Categories = ({ activeCategory, handleChangeCategory }) => {
 };
 
 const CategoryItem = ({ title, index, isActive, handleChangeCategory }) => {
+  const color = isActive ? theme.colors.white : theme.colors.neutral(0.8);
+  const backgroundColor = isActive ? theme.colors.neutral(0.8) : theme.colors.white;
+
   return (
-    <View>
+    <Animated.View
+      entering={FadeInRight.delay(index * 200)
+        .duration(1000)
+        .springify()
+        .damping(14)}>
       <Pressable
         onPress={() => handleChangeCategory(isActive ? null : title)}
-        style={[styles.category]}>
-        <Text style={[styles.title]}>{title}</Text>
+        style={[styles.category, { backgroundColor }]}>
+        <Text style={[styles.title, { color }]}>{title}</Text>
       </Pressable>
-    </View>
+    </Animated.View>
   );
 };
 

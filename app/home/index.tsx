@@ -1,25 +1,62 @@
 import { Feather, FontAwesome6, Ionicons } from '@expo/vector-icons';
-import React, { useRef, useState } from 'react';
+import { debounce } from 'lodash';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Categories from '~/components/Categories';
 
+import Categories from '~/components/Categories';
+import ImageGrid from '~/components/ImageGrid';
 import { theme } from '~/constants/theme';
 import { hp, wp } from '~/helpers/common';
+import { ApiResult, CategoriesResult } from '~/interfaces/apiResults';
+import { apiCall } from '~/services/api';
 
 const HomeScreen = () => {
   const { top } = useSafeAreaInsets();
   const paddingTop = top > 0 ? top + 10 : 30;
 
+  const [images, setImages] = useState<ApiResult[]>([]);
   const [search, setSearch] = useState<string>('');
   const searchInputRef = useRef<TextInput>(null);
+  const [activeCategory, setActiveCategory] = useState<CategoriesResult | null>(null);
 
-  const [activeCategory, setActiveCategory] = useState(null);
+  useEffect(() => {
+    fetchImages();
+  }, []);
 
-  const handleChangeCategory = (category) => {
+  const fetchImages = async (params = { page: 1 }, append = false) => {
+    const response = await apiCall(params);
+    if (response.hits) {
+      setImages((prev) => (append ? [...prev, ...response.hits] : response.hits));
+    }
+  };
+
+  const handleChangeCategory = (category: CategoriesResult) => {
     setActiveCategory(category);
   };
-  console.log('activeCategory', activeCategory);
+
+  const handleSearch = (text) => {
+    setSearch(text);
+    if (text.length > 2) {
+      const page = 1;
+      setImages([]);
+      fetchImages({ page, q: text });
+    }
+    if (text == '') {
+      const page = 1;
+      setImages([]);
+      fetchImages({ page });
+    }
+  };
+
+  const clearSearch = () => {
+    setSearch('');
+    searchInputRef.current?.clear();
+    setImages([]);
+    fetchImages({ page: 1 });
+  };
+
+  const handleTextDebounce = useCallback(debounce(handleSearch, 400), []);
 
   return (
     <View style={[styles.container, { paddingTop }]}>
@@ -43,12 +80,12 @@ const HomeScreen = () => {
           <TextInput
             placeholder="Search for photos..."
             style={styles.searchInput}
-            value={search}
+            //value={search}
             ref={searchInputRef}
-            onChangeText={(value) => setSearch(value)}
+            onChangeText={handleTextDebounce}
           />
           {search.length > 0 && (
-            <Pressable onPress={{}} style={styles.closeIcon}>
+            <Pressable onPress={clearSearch} style={styles.closeIcon}>
               <Ionicons name="close" size={24} color={theme.colors.neutral(0.4)} />
             </Pressable>
           )}
@@ -57,6 +94,9 @@ const HomeScreen = () => {
         <View style={styles.categories}>
           <Categories activeCategory={activeCategory} handleChangeCategory={handleChangeCategory} />
         </View>
+
+        {/* Images */}
+        <View>{images.length > 0 && <ImageGrid images={images} />}</View>
       </ScrollView>
     </View>
   );
@@ -106,4 +146,5 @@ const styles = StyleSheet.create({
   closeIcon: {
     marginLeft: 10,
   },
+  categories: {},
 });

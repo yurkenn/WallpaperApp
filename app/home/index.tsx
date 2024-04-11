@@ -31,8 +31,16 @@ const HomeScreen = () => {
     }
   };
 
-  const handleChangeCategory = (category: CategoriesResult) => {
-    setActiveCategory(category);
+  const handleChangeCategory = (cat: CategoriesResult) => {
+    setActiveCategory(cat);
+    clearSearch();
+    setImages([]);
+    const page = 1;
+    let params = {
+      page,
+    };
+    if (cat) params.category = cat;
+    fetchImages(params, false);
   };
 
   const handleSearch = (text) => {
@@ -40,12 +48,14 @@ const HomeScreen = () => {
     if (text.length > 2) {
       const page = 1;
       setImages([]);
-      fetchImages({ page, q: text });
+      setActiveCategory(null); //reset category while searching
+      fetchImages({ page, q: text }, false);
     }
     if (text == '') {
       const page = 1;
       setImages([]);
-      fetchImages({ page });
+      setActiveCategory(null); //reset category while searching
+      fetchImages({ page }, false);
     }
   };
 

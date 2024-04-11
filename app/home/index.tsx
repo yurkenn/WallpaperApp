@@ -1,10 +1,12 @@
 import { Feather, FontAwesome6, Ionicons } from '@expo/vector-icons';
+import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { debounce } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import Categories from '~/components/Categories';
+import FiltersModal from '~/components/FiltersModal';
 import ImageGrid from '~/components/ImageGrid';
 import { theme } from '~/constants/theme';
 import { hp, wp } from '~/helpers/common';
@@ -14,11 +16,12 @@ import { apiCall } from '~/services/api';
 const HomeScreen = () => {
   const { top } = useSafeAreaInsets();
   const paddingTop = top > 0 ? top + 10 : 30;
-
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const [images, setImages] = useState<ApiResult[]>([]);
   const [search, setSearch] = useState<string>('');
   const searchInputRef = useRef<TextInput>(null);
   const [activeCategory, setActiveCategory] = useState<CategoriesResult | null>(null);
+  const [filters, setFilters] = useState<any | null>(null);
 
   useEffect(() => {
     fetchImages();
@@ -68,6 +71,26 @@ const HomeScreen = () => {
 
   const handleTextDebounce = useCallback(debounce(handleSearch, 400), []);
 
+  const openFiltersModal = () => {
+    bottomSheetModalRef?.current?.present();
+  };
+
+  const closeFiltersModal = () => {
+    bottomSheetModalRef?.current?.dismiss();
+  };
+
+  const applyFilters = () => {
+    console.log('Filters Applied');
+    closeFiltersModal();
+  };
+  const resetFilters = () => {
+    console.log('Filters Applied');
+    setFilters(null);
+    closeFiltersModal();
+  };
+
+  console.log('Filters', filters);
+
   return (
     <View style={[styles.container, { paddingTop }]}>
       {/* Header */}
@@ -76,7 +99,7 @@ const HomeScreen = () => {
           <Text style={styles.title}>Pixels</Text>
         </Pressable>
 
-        <Pressable>
+        <Pressable onPress={openFiltersModal}>
           <FontAwesome6 name="bars-staggered" size={22} color={theme.colors.neutral(0.7)} />
         </Pressable>
       </View>
@@ -108,6 +131,15 @@ const HomeScreen = () => {
         {/* Images */}
         <View>{images.length > 0 && <ImageGrid images={images} />}</View>
       </ScrollView>
+      {/* Bottom Filter Modal */}
+      <FiltersModal
+        bottomSheetModalRef={bottomSheetModalRef}
+        filters={filters}
+        setFilters={setFilters}
+        onApply={applyFilters}
+        onReset={resetFilters}
+        onClose={closeFiltersModal}
+      />
     </View>
   );
 };

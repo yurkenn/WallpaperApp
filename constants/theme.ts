@@ -3,7 +3,6 @@ type fontWeights = {
   semibold: string;
   bold: string;
 };
-
 type radius = {
   xs: number;
   sm: number;

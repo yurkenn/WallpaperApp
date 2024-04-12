@@ -2,7 +2,15 @@ import { Feather, FontAwesome6, Ionicons } from '@expo/vector-icons';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { debounce } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import Categories from '~/components/Categories';
@@ -22,12 +30,15 @@ const HomeScreen = () => {
   const searchInputRef = useRef<TextInput>(null);
   const [activeCategory, setActiveCategory] = useState<CategoriesResult | null>(null);
   const [filters, setFilters] = useState<any | null>(null);
+  const scrollRef = useRef<ScrollView>(null);
+  const [isEndReached, setIsEndReached] = useState(false);
 
   useEffect(() => {
     fetchImages();
   }, []);
 
   const fetchImages = async (params = { page: 1 }, append = false) => {
+    console.log('params:', params, append);
     const response = await apiCall(params);
     if (response.hits) {
       setImages((prev) => (append ? [...prev, ...response.hits] : response.hits));
@@ -39,26 +50,31 @@ const HomeScreen = () => {
     clearSearch();
     setImages([]);
     const page = 1;
-    let params = {
+    const params = {
       page,
+      ...filters,
     };
     if (cat) params.category = cat;
     fetchImages(params, false);
   };
 
   const handleSearch = (text) => {
-    setSearch(text);
     if (text.length > 2) {
-      const page = 1;
+      setSearch(text);
       setImages([]);
-      setActiveCategory(null); //reset category while searching
-      fetchImages({ page, q: text }, false);
+      setActiveCategory(null);
+      const page = 1;
+      const params = {
+        ...filters,
+        page,
+        q: text,
+      };
+      if (activeCategory) params.category = activeCategory;
+      fetchImages(params, false);
     }
-    if (text == '') {
-      const page = 1;
-      setImages([]);
-      setActiveCategory(null); //reset category while searching
-      fetchImages({ page }, false);
+
+    if (text.length === 0) {
+      clearSearch();
     }
   };
 
@@ -80,22 +96,80 @@ const HomeScreen = () => {
   };
 
   const applyFilters = () => {
-    console.log('Filters Applied');
+    if (filters) {
+      const page = 1;
+      setImages([]);
+      const params = {
+        page,
+        ...filters,
+      };
+      if (activeCategory) params.category = activeCategory;
+      if (search) params.q = search;
+      fetchImages(params, false);
+    }
     closeFiltersModal();
   };
   const resetFilters = () => {
-    console.log('Filters Applied');
-    setFilters(null);
+    if (filters) {
+      const page = 1;
+      setFilters(null);
+      setImages([]);
+      const params = {
+        page,
+      };
+      if (activeCategory) params.category = activeCategory;
+      if (search) params.q = search;
+      fetchImages(params, false);
+    }
     closeFiltersModal();
   };
 
-  console.log('Filters', filters);
+  const clearThisFilter = (key) => {
+    const newFilters = { ...filters };
+    delete newFilters[key];
+    setFilters(newFilters);
+
+    const page = 1;
+    setImages([]);
+    const params = {
+      page,
+      ...newFilters,
+    };
+    if (activeCategory) params.category = activeCategory;
+    if (search) params.q = search;
+    fetchImages(params, false);
+  };
+
+  const handleScroll = (event) => {
+    const contentHeight = event.nativeEvent.contentSize.height;
+    const scrollViewHeight = event.nativeEvent.layoutMeasurement.height;
+    const scrollOffset = event.nativeEvent.contentOffset.y;
+    const bottomPosition = contentHeight - scrollViewHeight;
+
+    if (scrollOffset >= bottomPosition - 1) {
+      if (!isEndReached) {
+        setIsEndReached(true);
+        const page = Math.floor(images.length / 20) + 1;
+        const params = { page, ...filters };
+        if (activeCategory) params.category = activeCategory;
+        if (search) params.q = search;
+        fetchImages(params, true);
+        console.log('End Reached');
+      }
+    } else if (isEndReached) {
+      setIsEndReached(false);
+    }
+  };
+
+  const handleScrollUp = () => {
+    scrollRef.current?.scrollTo({ x: 0, y: 0, animated: true });
+  };
 
   return (
     <View style={[styles.container, { paddingTop }]}>
       {/* Header */}
       <View style={styles.header}>
-        <Pressable>
+        <Pressable onPress={handleScrollUp}>
           <Text style={styles.title}>Pixels</Text>
         </Pressable>
 
@@ -104,7 +178,11 @@ const HomeScreen = () => {
         </Pressable>
       </View>
 
-      <ScrollView contentContainerStyle={{ gap: 15 }}>
+      <ScrollView
+        onScroll={handleScroll}
+        scrollEventThrottle={5}
+        ref={scrollRef}
+        contentContainerStyle={{ gap: 15 }}>
         {/* Search Bar */}
         <View style={styles.searchBar}>
           <View style={styles.searchIcon}>
@@ -127,10 +205,46 @@ const HomeScreen = () => {
         <View style={styles.categories}>
           <Categories activeCategory={activeCategory} handleChangeCategory={handleChangeCategory} />
         </View>
+        {/* filters */}
+        {filters && (
+          <View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.filters}>
+              {Object.keys(filters).map((key, index) => {
+                return (
+                  <View key={key} style={styles.filterItem}>
+                    {key === 'colors' && (
+                      <View
+                        style={{
+                          width: 20,
+                          height: 20,
+                          borderRadius: 20,
+                          backgroundColor: filters[key],
+                        }}
+                      />
+                    )}
+                    <Text style={styles.filterItemText}>{filters[key]}</Text>
+                    <Pressable style={styles.filterCloseIcon} onPress={() => clearThisFilter(key)}>
+                      <Ionicons name="close" size={14} color={theme.colors.neutral(0.9)} />
+                    </Pressable>
+                  </View>
+                );
+              })}
+            </ScrollView>
+          </View>
+        )}
 
         {/* Images */}
         <View>{images.length > 0 && <ImageGrid images={images} />}</View>
+
+        {/* Loading */}
+        <View style={{ marginBottom: 70, marginTop: images.length > 0 ? 10 : 70 }}>
+          <ActivityIndicator size="large" />
+        </View>
       </ScrollView>
+
       {/* Bottom Filter Modal */}
       <FiltersModal
         bottomSheetModalRef={bottomSheetModalRef}
@@ -189,4 +303,26 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   categories: {},
+  filters: {
+    paddingHorizontal: wp(4),
+    gap: 10,
+  },
+  filterItem: {
+    backgroundColor: theme.colors.grayBG,
+    padding: 8,
+    paddingHorizontal: 10,
+    borderRadius: theme.radius.xs,
+    flexDirection: 'row',
+    gap: 10,
+    alignItems: 'center',
+  },
+  filterItemText: {
+    fontSize: hp(1.8),
+  },
+  filterCloseIcon: {
+    marginLeft: 5,
+    backgroundColor: theme.colors.neutral(0.2),
+    padding: 5,
+    borderRadius: theme.radius.xs,
+  },
 });

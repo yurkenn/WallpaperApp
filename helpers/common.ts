@@ -22,13 +22,12 @@ export const getColumnCount = (width: number) => {
   if (deviceWidth >= 414) {
     return 2;
   }
-  return 1;
 };
 
 export const getImageSize = (height: number, width: number) => {
   if (width > height) {
     return 250;
-    // lendscape
+    // landscape
   } else if (width < height) {
     return 300;
     // portrait

@@ -5,7 +5,13 @@ import { StyleSheet, Text, View } from 'react-native';
 import ImageCard from './ImageCard';
 
 import { getColumnCount, wp } from '~/helpers/common';
-const ImageGrid = ({ images, router }) => {
+
+type ImageGridProps = {
+  images: any[];
+  router: any;
+};
+
+const ImageGrid = ({ images, router }: ImageGridProps) => {
   const columns = getColumnCount();
 
   return (

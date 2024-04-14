@@ -5,7 +5,14 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { theme } from '~/constants/theme';
 import { getImageSize, wp } from '~/helpers/common';
 
-const ImageCard = ({ item, index, columns, router }) => {
+type ImageCardProps = {
+  item: any;
+  index: number;
+  columns: number;
+  router: any;
+};
+
+const ImageCard = ({ item, index, columns, router }: ImageCardProps) => {
   const isLastinRow = () => {
     return (index + 1) % columns === 0;
   };

@@ -20,7 +20,7 @@ import Toast from 'react-native-toast-message';
 import { theme } from '~/constants/theme';
 import { hp, wp } from '~/helpers/common';
 
-const imageScreen = () => {
+const ImageScreen = () => {
   const router = useRouter();
   const item = useLocalSearchParams();
   const uri = item?.webformatURL;
@@ -144,7 +144,7 @@ const imageScreen = () => {
   );
 };
 
-export default imageScreen;
+export default ImageScreen;
 
 const styles = StyleSheet.create({
   container: {

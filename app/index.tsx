@@ -29,7 +29,7 @@ const WelcomeScreen = () => {
             Every Pixel Tells a Story
           </Animated.Text>
           <Animated.View entering={FadeInDown.delay(600).springify()}>
-            <Pressable onPress={() => router.push('home')} style={styles.startButton}>
+            <Pressable onPress={() => router.push('/home/')} style={styles.startButton}>
               <Text style={styles.startText}>Start Explore</Text>
             </Pressable>
           </Animated.View>
@@ -65,14 +65,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: hp(7),
-    fontWeight: theme.fontWeights.bold,
+    fontWeight: '700',
     color: theme.colors.neutral(0.9),
   },
   punchline: {
     fontSize: hp(2),
     letterSpacing: 1,
     marginBottom: 10,
-    fontWeight: theme.fontWeights.medium,
+    fontWeight: '500',
   },
   startButton: {
     marginBottom: 50,
@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
   startText: {
     color: theme.colors.white,
     fontSize: hp(2.5),
-    fontWeight: theme.fontWeights.medium,
+    fontWeight: '500',
     letterSpacing: 1,
   },
 });

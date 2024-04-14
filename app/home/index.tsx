@@ -1,5 +1,6 @@
 import { Feather, FontAwesome6, Ionicons } from '@expo/vector-icons';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
+import { useRouter } from 'expo-router';
 import { debounce } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -32,6 +33,7 @@ const HomeScreen = () => {
   const [filters, setFilters] = useState<any | null>(null);
   const scrollRef = useRef<ScrollView>(null);
   const [isEndReached, setIsEndReached] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     fetchImages();
@@ -237,7 +239,7 @@ const HomeScreen = () => {
         )}
 
         {/* Images */}
-        <View>{images.length > 0 && <ImageGrid images={images} />}</View>
+        <View>{images.length > 0 && <ImageGrid images={images} router={router} />}</View>
 
         {/* Loading */}
         <View style={{ marginBottom: 70, marginTop: images.length > 0 ? 10 : 70 }}>

@@ -1,11 +1,11 @@
 import { Image } from 'expo-image';
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { theme } from '~/constants/theme';
 
+import { theme } from '~/constants/theme';
 import { getImageSize, wp } from '~/helpers/common';
 
-const ImageCard = ({ item, index, columns }) => {
+const ImageCard = ({ item, index, columns, router }) => {
   const isLastinRow = () => {
     return (index + 1) % columns === 0;
   };
@@ -18,7 +18,9 @@ const ImageCard = ({ item, index, columns }) => {
   };
 
   return (
-    <Pressable style={[styles.imageWrapper, !isLastinRow() && styles.spacing]}>
+    <Pressable
+      onPress={() => router.push({ pathname: 'home/image', params: { ...item } })}
+      style={[styles.imageWrapper, !isLastinRow() && styles.spacing]}>
       <Image
         style={[styles.image, getImageHeight()]}
         transition={100}

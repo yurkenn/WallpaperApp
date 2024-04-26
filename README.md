@@ -13,6 +13,8 @@ This is a wallpaper app that fetches images from the [Pixels API](https://www.pe
 
 ## Video Demo
 
+https://github.com/yurkenn/WallpaperApp/assets/69719126/67f588e9-279a-4d92-9b35-3373efd67887
+
 ## Contributing
 
 Contributions are welcome. Feel free to open a pull request or an issue.
